@@ -19,9 +19,15 @@ Resources:
     Type: AWS::EC2::VPC
     Properties:
       CidrBlock: '10.0.0.0/16'
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
       Tags:
         - Key: Environment
           Value: DevOpsAcademy
+        - Key: Nome
+          Value: "Damiano"
+        - Key: Cognome
+          Value: "Caratelli"
 
   MySubnet:
     Type: AWS::EC2::Subnet
