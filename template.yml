@@ -1,0 +1,164 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'DevOps Academy Infrastructure'
+
+Parameters:
+  KeyName:
+    Type: String
+    Description: Name of the SSH key pair to use for EC2 instances
+  YourName:
+    Type: String
+    Description: Damiano
+  YourSurname:
+    Type: String
+    Description: Caratelli
+
+Resources:
+  
+
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: '10.0.0.0/16'
+      Tags:
+        - Key: Environment
+          Value: DevOpsAcademy
+
+  MySubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: '10.0.0.0/24'
+      Tags:
+        - Key: Environment
+          Value: DevOpsAcademy
+
+  MyInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Environment
+          Value: DevOpsAcademy
+
+  MyVPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref MyVPC
+      InternetGatewayId: !Ref MyInternetGateway
+
+  MyRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MyVPC
+      Tags:
+        - Key: Environment
+          Value: DevOpsAcademy
+
+  MySubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MySubnet
+      RouteTableId: !Ref MyRouteTable
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for EC2 instances
+      VpcId: !Ref MyVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Environment
+          Value: DevOpsAcademy
+
+  MyLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: 'ami-0c55b159cbfafe1f0' 
+      InstanceType: t3.micro
+      KeyName: !Ref KeyName
+      SecurityGroups:
+        - !Ref MySecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd php php-mysql
+          systemctl enable httpd
+          systemctl start httpd
+          echo "<?php phpinfo(); ?>" > /var/www/html/index.php
+          chkconfig httpd on
+
+      Tags:
+        - Key: Name
+          Value: MyTaggedEC2Instance
+        - Key: Environment
+          Value: DevOpsAcademy
+        - Key: Nome
+          Value: Damiano
+        - Key: Cognome
+          Value: Caratelli
+
+  MyAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref MySubnet
+      LaunchConfigurationName: !Ref MyLaunchConfig
+      MinSize: 1
+      MaxSize: 3
+      DesiredCapacity: 2
+      Tags:
+        - Key: Environment
+          Value: DevOpsAcademy
+
+  MyTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref MyVPC
+      Protocol: HTTP
+      Port: 80
+      Targets:
+        - Id: !Ref MyAutoScalingGroup
+          Port: 80
+      Tags:
+        - Key: Environment
+          Value: DevOpsAcademy
+
+  MyLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: MyLoadBalancer
+      Subnets:
+        - !Ref MySubnet
+      SecurityGroups:
+        - !Ref MySecurityGroup
+
+  MyListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref MyLoadBalancer
+      Protocol: HTTP
+      Port: 80
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref MyTargetGroup
+
+Outputs:
+  IAMUserAccessKeyId:
+    Description: "IAM User Access Key ID"
+    Value: !Ref IAMUserAccessKey
+
+  VPCId:
+    Description: "VPC ID"
+    Value: !Ref VPC
+
+  SubnetId:
+    Description: "Subnet ID"
+    Value: !Ref Subnet
+
+  LoadBalancerDNSName:
+    Description: "Load Balancer DNS Name"
+    Value: !GetAtt ApplicationLoadBalancer.DNSName

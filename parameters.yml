@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'DevOps Academy Infrastructure'
+
+Parameters:
+  KeyName:
+    Type: String
+    Description: nome ssh key
+  YourName:
+    Type: String
+    Description: Damiano
+  YourSurname:
+    Type: String
+    Description: Caratelli
+  Environment:String
+
+  VPCCIDR:
+    Description: Blocco CIDR per la VPC (es. 10.0.0.0/16)
+    Type: String
+    Default: 10.0.0.0/16
+
+
+
+  
+
+
