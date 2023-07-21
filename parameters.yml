@@ -1,14 +1,20 @@
+AWSTemplateFormatVersion: '2010-09-09'
 
 Parameters:
   KeyName:
     Type: String
     Description: nome ssh key
+    Default: ValorePredefinito
+
   YourName:
     Type: String
     Description: Damiano
+    Default: ValorePredefinito
+
   YourSurname:
     Type: String
     Description: Caratelli
+    Default: ValorePredefinito
 
   VPCCIDR:
     Description: Blocco CIDR per la VPC (es. 10.0.0.0/16)

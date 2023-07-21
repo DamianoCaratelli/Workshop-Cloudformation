@@ -25,15 +25,17 @@ Resources:
       CidrBlock: '10.0.0.0/24'
       AvailabilityZone: eu-west-1
       Tags:
+        - Key: Name
+          Value: "Public Subnet"
         - Key: Environment
-          Value: DevOpsAcademy
+          Value: "DevOpsAcademy"
 
   MyInternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
-        - Key: Environment
-          Value: DevOpsAcademy
+        - Key: Name
+          Value: "MyInternetGateway"
 
   MyVPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -45,9 +47,6 @@ Resources:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref MyVPC
-      Tags:
-        - Key: Environment
-          Value: DevOpsAcademy
 
   MySubnetRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -65,16 +64,12 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0
-      Tags:
-        - Key: Environment
-          Value: DevOpsAcademy
 
   MyLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       ImageId: 'ami-0d7589be7e737a8c0' 
       InstanceType: t3.micro
-      KeyName: !Ref KeyName
       SecurityGroups:
         - !Ref MySecurityGroup
       UserData:
@@ -87,16 +82,6 @@ Resources:
           echo "<?php phpinfo(); ?>" > /var/www/html/index.php
           chkconfig httpd on
 
-      Tags:
-        - Key: Name
-          Value: MyTaggedEC2Instance
-        - Key: Environment
-          Value: DevOpsAcademy
-        - Key: Nome
-          Value: Damiano
-        - Key: Cognome
-          Value: Caratelli
-
   MyAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -106,9 +91,6 @@ Resources:
       MinSize: 1
       MaxSize: 3
       DesiredCapacity: 2
-      Tags:
-        - Key: Environment
-          Value: DevOpsAcademy
 
   MyTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -120,6 +102,10 @@ Resources:
         - Id: !Ref MyAutoScalingGroup
           Port: 80
       Tags:
+        - Key: Nome
+          Value: "Damiano"
+        - Key: Cognome
+          Value: "Caratelli"
         - Key: Environment
           Value: DevOpsAcademy
 
@@ -143,18 +129,6 @@ Resources:
           TargetGroupArn: !Ref MyTargetGroup
 
 Outputs:
-  IAMUserAccessKeyId:
-    Description: "IAM User Access Key ID"
-    Value: !Ref IAMUserAccessKey
-
-  VPCId:
-    Description: "VPC ID"
-    Value: !Ref VPC
-
-  SubnetId:
-    Description: "Subnet ID"
-    Value: !Ref Subnet
-
-  LoadBalancerDNSName:
-    Description: "Load Balancer DNS Name"
-    Value: !GetAtt ApplicationLoadBalancer.DNSName
+  LoadBalancerEndpoint:
+    Description: Endpoint del bilanciatore
+    Value: !GetAtt MyLoadBalancer.DNSName
