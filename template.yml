@@ -1,16 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'DevOps Academy Infrastructure'
-
-Parameters:
-  KeyName:
-    Type: String
-    Description: Name of the SSH key pair to use for EC2 instances
-  YourName:
-    Type: String
-    Description: Damiano
-  YourSurname:
-    Type: String
-    Description: Caratelli
+AWSTemplateFormatVersion: 2010-09-09
+Description: DevOps Academy Infrastructure
 
 Resources:
   
