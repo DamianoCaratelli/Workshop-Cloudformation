@@ -18,15 +18,27 @@ Resources:
         - Key: Cognome
           Value: "Caratelli"
 
-  MySubnet:
+  MySubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref MyVPC
-      CidrBlock: '10.0.0.0/24'
-      AvailabilityZone: eu-west-1
+      CidrBlock: '10.0.1.0/24'
+      AvailabilityZone: eu-west-3a
       Tags:
         - Key: Name
-          Value: "Public Subnet"
+          Value: "Public Subnet1"
+        - Key: Environment
+          Value: "DevOpsAcademy"
+      
+  MySubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: '10.0.2.0/24'
+      AvailabilityZone: eu-west-3b
+      Tags:
+        - Key: Name
+          Value: "Public Subnet2"
         - Key: Environment
           Value: "DevOpsAcademy"
 
@@ -43,16 +55,27 @@ Resources:
       VpcId: !Ref MyVPC
       InternetGatewayId: !Ref MyInternetGateway
 
-  MyRouteTable:
+  MyRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref MyVPC
 
-  MySubnetRouteTableAssociation:
+  MySubnetRouteTableAssociation1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref MySubnet
-      RouteTableId: !Ref MyRouteTable
+      SubnetId: !Ref MySubnet1
+      RouteTableId: !Ref MyRouteTable1
+
+  MyRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MyVPC
+
+  MySubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MySubnet2
+      RouteTableId: !Ref MyRouteTable2
 
   MySecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -68,7 +91,7 @@ Resources:
   MyLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
-      ImageId: 'ami-0d7589be7e737a8c0' 
+      ImageId: 'ami-052f10f1c45aa2155' 
       InstanceType: t3.micro
       SecurityGroups:
         - !Ref MySecurityGroup
@@ -86,7 +109,10 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-        - !Ref MySubnet
+        - !Ref MySubnet1
+        - !Ref MySubnet2
+      TargetGroupARNs: 
+        - !Ref MyTargetGroup
       LaunchConfigurationName: !Ref MyLaunchConfig
       MinSize: 1
       MaxSize: 3
@@ -98,9 +124,7 @@ Resources:
       VpcId: !Ref MyVPC
       Protocol: HTTP
       Port: 80
-      Targets:
-        - Id: !Ref MyAutoScalingGroup
-          Port: 80
+      TargetType: instance
       Tags:
         - Key: Nome
           Value: "Damiano"
@@ -114,7 +138,9 @@ Resources:
     Properties:
       Name: MyLoadBalancer
       Subnets:
-        - !Ref MySubnet
+        - !Ref MySubnet1
+        - !Ref MySubnet2
+        
       SecurityGroups:
         - !Ref MySecurityGroup
 

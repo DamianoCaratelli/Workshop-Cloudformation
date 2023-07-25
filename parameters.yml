@@ -1,25 +1,23 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Description: Parametri per Workshop su CloudFormation
 
 Parameters:
-  KeyName:
+  AMI:
+    Description: Amazon Machine Image ID
     Type: String
-    Description: nome ssh key
-    Default: ValorePredefinito
+    Default: "ami-0d7589be7e737a8c0"  
 
-  YourName:
+  InstanceType:
+    Description: Type of EC2 instance
     Type: String
-    Description: Damiano
-    Default: ValorePredefinito
+    Default: "t3.micro" 
+    AllowedValues:
+      - "t2.micro"
+      - "t2.small"
+      - "t3.micro"
+      - "t3.small"
 
-  YourSurname:
-    Type: String
-    Description: Caratelli
-    Default: ValorePredefinito
-
-  VPCCIDR:
-    Description: Blocco CIDR per la VPC (es. 10.0.0.0/16)
-    Type: String
-    Default: 10.0.0.0/16
+  
 
 
 
